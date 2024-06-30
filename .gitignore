@@ -1,0 +1,32 @@
+# Node.js dependencies
+node_modules/
+
+# Build output
+build/
+dist/
+
+# Compiled JavaScript
+*.js
+*.js.map
+
+# Editor directories and files
+.vscode/
+.idea/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+
+# Optional: Exclude specific config files if needed
+# Three.js specific generated files (adjust as per your setup)
+# .glsl files
+*.glsl

@@ -12,6 +12,15 @@ export class Game {
         this.view = new GameView();
         this.board = new Board();
 
-        this.view.add(this.board.view.tiles);
+        this.view.add(this.board.view.grid);
+        this.view.setClickCallback(this.onObjectClick.bind(this));
+    }
+
+    onObjectClick(uuid) {
+        const tileCoords = this.board.getClickedTileCoords(uuid);
+
+        if (tileCoords) {
+            this.board.onTileClick(tileCoords);
+        }
     }
 }
