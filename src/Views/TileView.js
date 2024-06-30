@@ -1,6 +1,5 @@
 import { TileConfig } from "../Constants/TileConfig";
 import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js';
-import { Tile } from "../Controllers/Tile";
 
 export class TileView {
     constructor(model) {
@@ -12,9 +11,9 @@ export class TileView {
     }
 
     draw() {
-        this.drawBackground();
         this.drawNumber();
         this.drawFrame();
+        this.drawBackground();
     }
 
     drawBackground() {

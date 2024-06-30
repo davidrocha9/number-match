@@ -17,7 +17,7 @@ export class Board {
 
     createTiles() {
         this.tiles = [];
-        this.selectedTile = null;
+        this._selectedTile = null;
 
         let row = [];
         for (let rowIdx = 0; rowIdx < this.model.rows; rowIdx++) {
@@ -49,31 +49,91 @@ export class Board {
         const YCoords = tileCoords.row;
         const tile = this.tiles[YCoords][XCoords];
 
-        if (!this.selectedTile) {
+        if (!this._selectedTile || this._selectedTile === tile) {
             tile.addHighlight();
-            this.selectedTile = tile;
+            this._selectedTile = tile;
+            return;
+        }
+
+        if (this.canMatchTiles(this._selectedTile, tile)) {
+            if (this.checkIfTilesAreAdjacent(this._selectedTile, tile)) {
+                this.removeTiles(this._selectedTile, tile);   
+            }
         }
         else {
-            if (this.selectedTile === tile) {
-                return;
-            }
-
-            if (this.selectedTile.number + tile.number === BoardConfig.TARGET_SUM) {
-                this.removeTiles(tile);
-            }
-            else {
-                tile.addHighlight();
-                this.selectedTile.removeHighlight();
-                this.selectedTile = tile;
-            }
+            tile.addHighlight();
+            this._selectedTile.removeHighlight();
+            this._selectedTile = tile;
         }
     }
 
-    removeTiles(tile) {
-        tile.addHighlight();
-        tile.disable();
-        this.selectedTile.disable();
+    removeTiles(tile1, tile2) {
+        tile1.addHighlight();
+        tile2.disable();
+        this._selectedTile.disable();
 
-        this.selectedTile = null;
+        this._selectedTile = null;
+    }
+
+    canMatchTiles(tile1, tile2) {
+        return tile1.number === tile2.number || tile1.number + tile2.number === BoardConfig.TARGET_SUM;
+    }
+
+    checkIfTilesAreAdjacent(tile1, tile2) {
+        const xDiff = tile2.col - tile1.col;
+        const yDiff = tile2.row - tile1.row;
+
+        if (this.areTilesDirectlyConnected(xDiff, yDiff)) {
+            const xStep = xDiff / Math.abs(xDiff) || 0;
+            const yStep = yDiff / Math.abs(yDiff) || 0;
+            let currTile = this.tiles[tile1.row + yStep][tile1.col + xStep];
+
+            while (currTile.col !== tile2.model.col || currTile.row !== tile2.model.row) {
+                if (currTile.active) {
+                    return false;
+                }
+
+                currTile = this.tiles[currTile.row + yStep][currTile.col + xStep];
+            }
+
+            return true;
+        }
+
+        let startTile = yDiff < 0 ? tile1 : tile2;
+        let targetTile = yDiff < 0 ? tile2 : tile1;
+        let xStep = 1;
+        let yStep = -1;
+        
+        while (startTile.col !== targetTile.col || startTile.row !== targetTile.row) {
+            if (startTile.col + xStep >= BoardConfig.COLS - 1) {
+                startTile = this.tiles[startTile.row + yStep][0];
+            }
+            else{
+                startTile = this.tiles[startTile.row][startTile.col + xStep];
+            }
+
+            if (startTile.active && startTile !== targetTile) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+
+    areTilesDirectlyConnected(xDiff, yDiff) {
+        return this.areTilesConnectedDiagonally(xDiff, yDiff) ||
+               this.areTilesConnectedHorizontally(xDiff, yDiff) ||
+               this.areTilesConnectedVertically(xDiff, yDiff);
+    }
+    areTilesConnectedDiagonally(xDiff, yDiff) {
+        return Math.abs(xDiff) === Math.abs(yDiff);
+    }
+
+    areTilesConnectedHorizontally(xDiff, yDiff) {
+        return yDiff === 0;
+    }
+
+    areTilesConnectedVertically(xDiff, yDiff) {
+        return xDiff === 0;
     }
 }

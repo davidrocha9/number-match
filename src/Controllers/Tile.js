@@ -24,13 +24,26 @@ export class Tile {
     removeHighlight() {
         this.view.removeHighlight();
     }
-
+    
     disable() {
         this.model.active = false;
+        this.view.removeHighlight();
         this.view.disable();
+    }
+
+    get row() {
+        return this.model.row;
+    }
+
+    get col() {
+        return this.model.col;
     }
 
     get number() {
         return this.model.number;
+    }
+
+    get active() {
+        return this.model.active;
     }
 }
