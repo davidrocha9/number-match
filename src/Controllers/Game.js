@@ -25,7 +25,9 @@ export class Game {
         if (tileCoords) {
             const newPoints = this.board.onTileClick(tileCoords);
 
-            //this.score.increase(newPoints);
+            if (newPoints > 0) {
+                this.score.increase(newPoints);
+            }
         }
     }
 }

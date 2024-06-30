@@ -8,6 +8,6 @@ export class ScoreModel {
     }
 
     set score(points) {
-        this._score += points;
+        this._score = points;
     }
 }

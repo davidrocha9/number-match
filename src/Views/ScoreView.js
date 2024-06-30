@@ -60,6 +60,7 @@ export class ScoreView {
     }
 
     update() {
-        console.log(this.model.score);
+        this.group.remove(this.textMesh);
+        this.drawText();
     }
 }

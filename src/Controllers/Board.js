@@ -57,8 +57,9 @@ export class Board {
 
         if (this.canMatchTiles(this._selectedTile, tile)) {
             if (this.checkIfTilesAreAdjacent(this._selectedTile, tile)) {
-                this.removeTiles(this._selectedTile, tile);  
-                return this.calculateDistancePointsBetweenTiles(this._selectedTile, tile); 
+                const distancePoints = this.calculateDistancePointsBetweenTiles(this._selectedTile, tile); 
+                this.removeTiles(this._selectedTile, tile);
+                return distancePoints;
             }
         }
         else {
