@@ -52,18 +52,20 @@ export class Board {
         if (!this._selectedTile || this._selectedTile === tile) {
             tile.addHighlight();
             this._selectedTile = tile;
-            return;
+            return 0;
         }
 
         if (this.canMatchTiles(this._selectedTile, tile)) {
             if (this.checkIfTilesAreAdjacent(this._selectedTile, tile)) {
-                this.removeTiles(this._selectedTile, tile);   
+                this.removeTiles(this._selectedTile, tile);  
+                return this.calculateDistancePointsBetweenTiles(this._selectedTile, tile); 
             }
         }
         else {
             tile.addHighlight();
             this._selectedTile.removeHighlight();
             this._selectedTile = tile;
+            return 0;
         }
     }
 
@@ -136,4 +138,11 @@ export class Board {
     areTilesConnectedVertically(xDiff, yDiff) {
         return xDiff === 0;
     }
+
+    calculateDistancePointsBetweenTiles(tile1, tile2) {
+        const xDiff = Math.abs(tile2.col - tile1.col);
+        const yDiff = Math.abs(tile2.row - tile1.row);
+
+        return xDiff + yDiff;
+    }   
 }

@@ -23,7 +23,9 @@ export class Game {
         const tileCoords = this.board.getClickedTileCoords(uuid);
 
         if (tileCoords) {
-            this.board.onTileClick(tileCoords);
+            const newPoints = this.board.onTileClick(tileCoords);
+
+            //this.score.increase(newPoints);
         }
     }
 }
