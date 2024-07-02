@@ -1,17 +1,17 @@
 import { TileConfig } from "../Constants/TileConfig";
+import { BoardConfig } from "../Constants/BoardConfig";
 import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js';
 
 export class TileView {
     constructor(model) {
         this.model = model;
         this.x = TileConfig.EDGE_SIZE * (this.model.col + 1);
-        this.y = TileConfig.EDGE_SIZE * (this.model.row + 1);
+        this.y = TileConfig.EDGE_SIZE * (BoardConfig.ROWS - this.model.row);
         this.group = new THREE.Group();
         this.draw();
     }
 
     draw() {
-        this.drawNumber();
         this.drawFrame();
         this.drawBackground();
     }

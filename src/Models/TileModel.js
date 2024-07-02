@@ -1,9 +1,8 @@
 export class TileModel {
     constructor(row, col) {
-        this._number = Math.floor(1 + Math.random() * 9);
         this._row = row;
         this._col = col;
-        this._active = true;
+        this._active = false;
     }
 
     get number() {
@@ -24,5 +23,9 @@ export class TileModel {
 
     set active(active) {
         this._active = active;
+    }
+
+    set number(number) {
+        this._number = number;
     }
 }

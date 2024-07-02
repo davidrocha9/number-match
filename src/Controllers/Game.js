@@ -5,10 +5,6 @@ import { Score } from "./Score";
 
 export class Game {
     constructor() {
-        this.init();
-    }
-
-    init() {
         this.model = new GameModel();
         this.view = new GameView();
         this.board = new Board();
@@ -16,7 +12,12 @@ export class Game {
 
         this.view.add(this.board.view.grid);
         this.view.add(this.score.view.group);
-        this.view.setClickCallback(this.onObjectClick.bind(this));
+
+        this.start();
+    }
+
+    start() {
+        this.board.generateInitialTiles();
     }
 
     onObjectClick(uuid) {

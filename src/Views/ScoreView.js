@@ -47,6 +47,7 @@ export class ScoreView {
             });
             const material = new THREE.MeshBasicMaterial({ color: ScoreConfig.FONT_COLOR });
             this.textMesh = new THREE.Mesh(geometry, material);
+            
 
             geometry.computeBoundingBox();
             const textWidth = geometry.boundingBox.max.x - geometry.boundingBox.min.x;

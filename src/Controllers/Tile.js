@@ -24,6 +24,12 @@ export class Tile {
     removeHighlight() {
         this.view.removeHighlight();
     }
+
+    enable() {
+        this.model.active = true;
+        this.model.number = Math.floor(1 + Math.random() * 9);
+        this.view.drawNumber();
+    }
     
     disable() {
         this.model.active = false;

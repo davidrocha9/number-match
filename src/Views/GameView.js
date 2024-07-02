@@ -45,32 +45,46 @@ export class GameView {
     }
 
     addEventListeners() {
-        window.addEventListener('mousemove', this.onMouseMove.bind(this), false);
         window.addEventListener('click', this.onClick.bind(this), false);
     }
 
-    setClickCallback(callback) {
-        this.clickCallback = callback;
-    }
+    worldToScreen(worldVector) {
+        const width = this.renderer.domElement.width;
+        const height = this.renderer.domElement.height;
+        const vector = worldVector.clone().project(this.camera);
 
-    onMouseMove(event) {
-        // Convert the mouse position to normalized device coordinates (-1 to +1) for both components
-        this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        vector.x = (vector.x + 1) / 2 * width;
+        vector.y = -(vector.y - 1) / 2 * height;
+
+        return vector;
     }
 
     onClick(event) {
-        // Update the picking ray with the camera and mouse position
-        this.raycaster.setFromCamera(this.mouse, this.camera);
+        const halfSize = 5 / 2;
 
-        // Calculate objects intersecting the picking ray
-        const intersects = this.raycaster.intersectObjects(this.scene.children, true);
+        const corners = [
+            new THREE.Vector3(-halfSize, -halfSize, 0),
+            new THREE.Vector3(halfSize, -halfSize, 0),
+            new THREE.Vector3(-halfSize, halfSize, 0),
+            new THREE.Vector3(halfSize, halfSize, 0)
+        ];
 
-        if (intersects.length > 0) {
-            const uuid = intersects[0].object.uuid;
-            if (this.clickCallback) {
-                this.clickCallback(uuid); // Call the callback with the intersected object's UUID
-            }
-        }
+        const screenCorners = corners.map(corner => this.worldToScreen(corner));
+        
+        const minX = Math.min(...screenCorners.map(corner => corner.x));
+        const maxX = Math.max(...screenCorners.map(corner => corner.x));
+        const minY = Math.min(...screenCorners.map(corner => corner.y));
+        const maxY = Math.max(...screenCorners.map(corner => corner.y));
+        
+        const planeWidth = maxX - minX;
+        const planeHeight = maxY - minY;
+
+        const centerX = this.renderer.domElement.width / 2;
+        const centerY = this.renderer.domElement.height / 2;
+        
+        const x = centerX - event.clientX;
+        const y = centerY - event.clientY;
+
+        console.log(Math.round(Math.abs(x / planeWidth)), Math.round(Math.abs(y / planeHeight)));
     }
 }

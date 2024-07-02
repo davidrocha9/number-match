@@ -5,10 +5,6 @@ import { BoardConfig } from "../Constants/BoardConfig";
 
 export class Board {
     constructor() {
-        this.init();
-    }
-
-    init() {
         this.model = new BoardModel();
         this.view = new BoardView(this.model);
 
@@ -32,12 +28,25 @@ export class Board {
         }
     }
 
+    generateInitialTiles() {
+        for (let rowIdx = 0; rowIdx < this.model.rows; rowIdx++) {
+            for (let colIdx = 0; colIdx < this.model.cols; colIdx++) {
+                this.tiles[rowIdx][colIdx].enable();
+
+                // Should only generate a pre-determined number of tiles
+                if (rowIdx * this.model.cols + colIdx > BoardConfig.GAME_START_AMOUNT_TILES) {
+                    return;
+                }
+            }
+        }
+    }
+
     getClickedTileCoords(uuid) {
         for (let rowIdx = 0; rowIdx < this.model.rows; rowIdx++) {
             for (let colIdx = 0; colIdx < this.model.cols; colIdx++) {
                 const tile = this.tiles[rowIdx][colIdx];
                 
-                if (tile.containsObjectWithUUID(uuid)) {
+                if (tile.containsObjectWithUUID(uuid) && tile.active) {
                     return { row: rowIdx, col: colIdx };
                 }
             }
