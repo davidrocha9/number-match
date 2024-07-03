@@ -27,5 +27,7 @@ export class Game {
 
         const newPoints = this.board.onTileClick(coords);
         this.score.increase(newPoints);
+
+        this.board.checkForRowsClears();
     }
 }

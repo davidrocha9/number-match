@@ -1,6 +1,8 @@
 import { TileConfig } from "../Constants/TileConfig";
 import { BoardConfig } from "../Constants/BoardConfig";
+import { delay } from "../Utils";
 import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js';
+import TWEEN from 'tween.js'
 
 export class TileView {
     constructor(model) {
@@ -41,16 +43,16 @@ export class TileView {
                 bevelSegments: 5,
             });
             const material = new THREE.MeshBasicMaterial({ color: TileConfig.FONT_COLOR });
-            this.textMesh = new THREE.Mesh(geometry, material);
+            this.numberText = new THREE.Mesh(geometry, material);
 
             geometry.computeBoundingBox();
             const textWidth = geometry.boundingBox.max.x - geometry.boundingBox.min.x;
             const textHeight = geometry.boundingBox.max.y - geometry.boundingBox.min.y;
             const textXCoord = this.x - textWidth / 2 - TileConfig.EDGE_SIZE / 2;
             const textYCoord = this.y - textHeight / 2 - TileConfig.EDGE_SIZE / 2;
-            this.textMesh.position.set(textXCoord, textYCoord, 0);
+            this.numberText.position.set(textXCoord, textYCoord, 0);
 
-            this.group.add(this.textMesh);
+            this.group.add(this.numberText);
         });
     }
 
@@ -79,7 +81,30 @@ export class TileView {
 
     disable() {
         this.removeHighlight();
-        this.textMesh.material.color = new THREE.Color(TileConfig.DISABLED_COLOR);
-        this.textMesh.material.needsUpdate = true; // Three.js needs this to be set to true to update the material
+        this.numberText.material.color = new THREE.Color(TileConfig.DISABLED_COLOR);
+        this.numberText.material.needsUpdate = true; // Three.js needs this to be set to true to update the material
     }
+
+    remove() {
+        const startColor = { r: this.square.material.color.r, g: this.square.material.color.g, b: this.square.material.color.b };
+        const endColor = new THREE.Color(TileConfig.DISABLED_COLOR);
+        const targetColor = { r: endColor.r, g: endColor.g, b: endColor.b };
+
+        const tween = new TWEEN.Tween(startColor)
+            .to(targetColor, 100) // Fade out over 1000ms (1 second)
+            .onUpdate(() => {
+                this.square.material.color.setRGB(startColor.r, startColor.g, startColor.b);
+                this.square.material.needsUpdate = true; // Ensure material updates
+            })
+            .onComplete(async () => {
+                await delay(150);
+                this.group.remove(this.numberText);
+                this.removeHighlight();
+            })
+            .start();
+
+        this.square.material.color = new THREE.Color(endColor.r, endColor.g, endColor.b);
+        this.square.material.needsUpdate = true;
+    }
+     
 }

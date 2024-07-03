@@ -1,4 +1,5 @@
 import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js';
+import TWEEN from 'tween.js';
 import { SceneConfig } from '../Constants/SceneConfig';
 import { EventConstants } from '../Constants/EventConstants';
 import { getClickedTileCoords } from '../Utils';
@@ -31,8 +32,8 @@ export class GameView {
         // Create a vector to store the mouse position
         this.mouse = new THREE.Vector2();
 
-        // Render the scene
-        this.render();
+        // Animate the scene
+        this.animate();
     }
 
     add(mesh) {
@@ -41,7 +42,12 @@ export class GameView {
 
     render() {
         this.renderer.render(this.scene, this.camera);
-        requestAnimationFrame(this.render.bind(this));
+    }
+
+    animate() {
+        requestAnimationFrame(this.animate.bind(this));
+        TWEEN.update(); // Continuously update all active tweens
+        this.render(); // Render the scene
     }
 
     addEventListeners() {

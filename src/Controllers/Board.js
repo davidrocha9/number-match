@@ -2,6 +2,7 @@ import { BoardView } from "../Views/BoardView";
 import { BoardModel } from "../Models/BoardModel";
 import { Tile } from "./Tile";
 import { BoardConfig } from "../Constants/BoardConfig";
+import { delay } from "../Utils";
 
 export class Board {
     constructor() {
@@ -75,19 +76,17 @@ export class Board {
             return 0;
         }
 
-        if (this.canMatchTiles(this._selectedTile, tile)) {
-            if (this.checkIfTilesAreAdjacent(this._selectedTile, tile)) {
-                const distancePoints = this.calculateDistancePointsBetweenTiles(this._selectedTile, tile); 
-                this.removeTiles(this._selectedTile, tile);
-                return distancePoints;
-            }
+        if (this.canMatchTiles(this._selectedTile, tile) && this.checkIfTilesAreAdjacent(this._selectedTile, tile)) {
+            const distancePoints = this.calculateDistancePointsBetweenTiles(this._selectedTile, tile); 
+            this.removeTiles(this._selectedTile, tile);
+            return distancePoints;
         }
-        else {
-            tile.addHighlight();
-            this._selectedTile.removeHighlight();
-            this._selectedTile = tile;
-            return 0;
-        }
+
+        tile.addHighlight();
+        this._selectedTile.removeHighlight();
+        this._selectedTile = tile;
+
+        return 0;
     }
 
     removeTiles(tile1, tile2) {
@@ -99,6 +98,7 @@ export class Board {
     }
 
     canMatchTiles(tile1, tile2) {
+        return true;
         return tile1.number === tile2.number || tile1.number + tile2.number === BoardConfig.TARGET_SUM;
     }
 
@@ -122,11 +122,11 @@ export class Board {
             return true;
         }
 
-        let startTile = yDiff < 0 ? tile1 : tile2;
-        let targetTile = yDiff < 0 ? tile2 : tile1;
+        let startTile = yDiff > 0 ? tile1 : tile2;
+        let targetTile = yDiff > 0 ? tile2 : tile1;
         let xStep = 1;
-        let yStep = -1;
-        
+        let yStep = 1;
+
         while (startTile.col !== targetTile.col || startTile.row !== targetTile.row) {
             if (startTile.col + xStep >= BoardConfig.COLS - 1) {
                 startTile = this.tiles[startTile.row + yStep][0];
@@ -139,7 +139,7 @@ export class Board {
                 return false;
             }
         }
-        
+
         return true;
     }
 
@@ -166,4 +166,24 @@ export class Board {
 
         return xDiff + yDiff;
     }   
+
+    checkIfShouldRemoveRow(idx)
+    {
+        return this.tiles[idx].every(tile => !tile.active && tile.number > 0)
+    }
+
+    async removeRow(idx) {
+        for (let colIdx = 0; colIdx < BoardConfig.COLS; colIdx++) {
+            await delay(50);
+            this.tiles[idx][colIdx].remove();
+        }
+    }
+
+    checkForRowsClears() {
+        for (let rowIdx = 0; rowIdx < BoardConfig.ROWS; rowIdx++) {
+            if (this.checkIfShouldRemoveRow(rowIdx)) {
+                this.removeRow(rowIdx);
+            }
+        }
+    }
 }

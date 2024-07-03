@@ -13,7 +13,6 @@ export class Tile {
                 return true;
             }
         }
-
         return false;
     }
 
@@ -35,6 +34,10 @@ export class Tile {
         this.model.active = false;
         this.view.removeHighlight();
         this.view.disable();
+    }
+
+    remove() {
+        this.view.remove();
     }
 
     get row() {

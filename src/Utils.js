@@ -2,6 +2,10 @@ import { TileConfig } from "./Constants/TileConfig";
 import { BoardConfig } from "./Constants/BoardConfig";
 import * as THREE from 'three';
 
+export const delay = (ms) => {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 const worldToScreen = (worldVector, camera, screenWidth, screenHeight) => {
     const vector = worldVector.clone().project(camera);
 
