@@ -6,7 +6,7 @@ import { Score } from "./Score";
 export class Game {
     constructor() {
         this.model = new GameModel();
-        this.view = new GameView();
+        this.view = new GameView(this.onObjectClick.bind(this));
         this.board = new Board();
         this.score = new Score();
 
@@ -20,15 +20,12 @@ export class Game {
         this.board.generateInitialTiles();
     }
 
-    onObjectClick(uuid) {
-        const tileCoords = this.board.getClickedTileCoords(uuid);
-
-        if (tileCoords) {
-            const newPoints = this.board.onTileClick(tileCoords);
-
-            if (newPoints > 0) {
-                this.score.increase(newPoints);
-            }
+    onObjectClick(coords) {
+        if (!this.board.checkIfValidCoords(coords)) {
+            return;
         }
+
+        const newPoints = this.board.onTileClick(coords);
+        this.score.increase(newPoints);
     }
 }

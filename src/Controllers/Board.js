@@ -53,11 +53,22 @@ export class Board {
         }
     }
 
+    checkIfValidCoords(coords) {
+        if (coords.row < 0 || coords.row >= this.model.rows
+            || coords.col < 0 || coords.col >= this.model.cols)
+        {
+            return false;
+        }
+        
+        const clickedTile = this.tiles[coords.row][coords.col];
+        return clickedTile.active;
+    }
+
     onTileClick(tileCoords) {
         const XCoords = tileCoords.col;
         const YCoords = tileCoords.row;
         const tile = this.tiles[YCoords][XCoords];
-
+        
         if (!this._selectedTile || this._selectedTile === tile) {
             tile.addHighlight();
             this._selectedTile = tile;
