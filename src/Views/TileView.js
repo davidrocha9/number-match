@@ -5,12 +5,17 @@ import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/thr
 import TWEEN from 'tween.js'
 
 export class TileView {
-    constructor(model) {
+    constructor(model, tileRemoveCallback) {
         this.model = model;
         this.x = TileConfig.EDGE_SIZE * (this.model.col + 1);
         this.y = TileConfig.EDGE_SIZE * (BoardConfig.ROWS - this.model.row);
         this.group = new THREE.Group();
+        this.removeCallback = tileRemoveCallback;
         this.draw();
+    }
+
+    reset() {
+        this.group.remove(this.numberText);
     }
 
     draw() {
@@ -21,10 +26,12 @@ export class TileView {
     drawBackground() {
         const geometry = new THREE.PlaneGeometry(TileConfig.EDGE_SIZE, TileConfig.EDGE_SIZE);
         const material = new THREE.MeshBasicMaterial({ color: TileConfig.NOT_SELECTED_COLOR, side: THREE.DoubleSide });
-        this.square = new THREE.Mesh(geometry, material);
         const XCoord = this.x - TileConfig.EDGE_SIZE / 2;
         const YCoord = this.y - TileConfig.EDGE_SIZE / 2;
+        
+        this.square = new THREE.Mesh(geometry, material);
         this.square.position.set(XCoord, YCoord, 0);
+
         this.group.add(this.square);
     }
 
@@ -42,7 +49,10 @@ export class TileView {
                 bevelOffset: 0,
                 bevelSegments: 5,
             });
-            const material = new THREE.MeshBasicMaterial({ color: TileConfig.FONT_COLOR });
+            let fontColor = this.model.active ? TileConfig.FONT_COLOR : TileConfig.DISABLED_COLOR;
+            fontColor = this.model.isEmpty() ? TileConfig.NOT_SELECTED_COLOR : fontColor;
+
+            const material = new THREE.MeshBasicMaterial({ color: fontColor });
             this.numberText = new THREE.Mesh(geometry, material);
 
             geometry.computeBoundingBox();
@@ -98,13 +108,17 @@ export class TileView {
             })
             .onComplete(async () => {
                 await delay(150);
-                this.group.remove(this.numberText);
+                this.removeNumber();
                 this.removeHighlight();
+                this.removeCallback();
             })
             .start();
 
         this.square.material.color = new THREE.Color(endColor.r, endColor.g, endColor.b);
         this.square.material.needsUpdate = true;
     }
-     
+    
+    removeNumber() {
+        this.group.remove(this.numberText);
+    }
 }

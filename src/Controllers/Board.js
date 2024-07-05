@@ -10,6 +10,7 @@ export class Board {
         this.view = new BoardView(this.model);
 
         this.createTiles();
+        this.amountOfTilesToBeRemoved = 0;
     }
 
     createTiles() {
@@ -19,7 +20,7 @@ export class Board {
         let row = [];
         for (let rowIdx = 0; rowIdx < this.model.rows; rowIdx++) {
             for (let colIdx = 0; colIdx < this.model.cols; colIdx++) {
-                const tile = new Tile(rowIdx, colIdx);
+                const tile = new Tile(rowIdx, colIdx, this.handleRemovedTile);
                 this.view.add(tile.view.group);
                 row.push(tile);
             }
@@ -98,7 +99,6 @@ export class Board {
     }
 
     canMatchTiles(tile1, tile2) {
-        return true;
         return tile1.number === tile2.number || tile1.number + tile2.number === BoardConfig.TARGET_SUM;
     }
 
@@ -173,10 +173,42 @@ export class Board {
     }
 
     async removeRow(idx) {
+        this.amountOfTilesToBeRemoved += BoardConfig.COLS;
+    
         for (let colIdx = 0; colIdx < BoardConfig.COLS; colIdx++) {
             await delay(50);
             this.tiles[idx][colIdx].remove();
         }
+    }
+
+    handleRemovedTile = () => {
+        this.amountOfTilesToBeRemoved--;
+        
+        if (this.amountOfTilesToBeRemoved === 0) {
+            this.handleRemovedRows();
+        }
+    }
+
+    handleRemovedRows() {
+        for (let rowIdx = 0; rowIdx < BoardConfig.ROWS; rowIdx++) {
+            for (let colIdx = 0; colIdx < BoardConfig.COLS; colIdx++) {
+                this.shiftTileUp(rowIdx, colIdx);
+            }
+        }
+    }
+
+    shiftTileUp(rowIdx, colIdx) {
+        const startRowIdx = rowIdx;
+        while (rowIdx > 0 && this.tiles[rowIdx - 1][colIdx].isEmpty()) {
+            rowIdx--;
+        }
+
+        this.tiles[rowIdx][colIdx].update(
+            this.tiles[startRowIdx][colIdx].number,
+            this.tiles[startRowIdx][colIdx].active
+        );
+
+        this.tiles[startRowIdx][colIdx].reset();
     }
 
     checkForRowsClears() {

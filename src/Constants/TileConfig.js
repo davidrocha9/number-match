@@ -4,5 +4,6 @@ export const TileConfig = {
     NOT_SELECTED_COLOR: 0xD1D1D1,
     SELECTED_COLOR: 0xADD8E6,
     DISABLED_COLOR: 0xADACAC,
-    FONT_URL: 'https://threejs.org/examples/fonts/helvetiker_regular.typeface.json'
+    FONT_URL: 'https://threejs.org/examples/fonts/helvetiker_regular.typeface.json',
+    EMPTY_VALUE: 0
 }

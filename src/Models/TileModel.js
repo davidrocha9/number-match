@@ -1,8 +1,19 @@
+import { TileConfig } from "../Constants/TileConfig";
+
 export class TileModel {
     constructor(row, col) {
         this._row = row;
         this._col = col;
+        this.reset();
+    }
+
+    reset() {
+        this._number = TileConfig.EMPTY_VALUE;
         this._active = false;
+    }
+    
+    isEmpty() {
+        return this._number === TileConfig.EMPTY_VALUE;
     }
 
     get number() {

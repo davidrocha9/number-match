@@ -1,10 +1,13 @@
+import { TileConfig } from '../Constants/TileConfig.js';
 import { TileModel } from '../Models/TileModel.js';
 import { TileView } from '../Views/TileView.js';
 
 export class Tile {
-    constructor(row, col) {
+    constructor(row, col, resetCallBack) {
         this.model = new TileModel(row, col);
-        this.view = new TileView(this.model);
+        this.view = new TileView(this.model, this.removeCallback);
+
+        this.resetCallback = resetCallBack;
     }
 
     containsObjectWithUUID(uuid) {
@@ -40,6 +43,33 @@ export class Tile {
         this.view.remove();
     }
 
+    isEmpty() {
+        return this.model.isEmpty();
+    }
+
+    reset() {
+        this.model.reset();
+        this.view.reset();
+    }
+
+    removeCallback = () => {
+        this.model.reset();
+        this.resetCallback();
+    }
+
+    update(number, active) {
+        this.model.number = number;
+        this.model.active = active;
+
+        this.view.reset();
+
+        if (this.isEmpty()) {
+            return;
+        }
+
+        this.view.drawNumber();
+    }
+
     get row() {
         return this.model.row;
     }
@@ -54,5 +84,13 @@ export class Tile {
 
     get active() {
         return this.model.active;
+    }
+
+    set number(number) {
+        this.model.number = number;
+    }
+
+    set active(active) {
+        this.model.active = active;
     }
 }
