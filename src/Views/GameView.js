@@ -3,12 +3,18 @@ import TWEEN from 'tween.js';
 import { SceneConfig } from '../Constants/SceneConfig';
 import { EventConstants } from '../Constants/EventConstants';
 import { getClickedTileCoords } from '../Utils';
+import { UIView } from '../Views/UIView';
 
 export class GameView {
-    constructor(clickCallback) {
+    constructor(model, tileClickCallback, uiClickCallback) {
+        this.model = model;
+        this.uiView = new UIView(this.model.ui);
+
         this.init();
         this.addEventListeners();
-        this.handleClick = clickCallback;
+
+        this.handleTileClick = tileClickCallback;
+        this.handleUIClick = uiClickCallback;
     }
 
     init() {
@@ -34,6 +40,12 @@ export class GameView {
 
         // Animate the scene
         this.animate();
+
+        this.scene.add(this.uiView.group);
+    }
+
+    update(uiModel) {
+        this.uiView.update(uiModel);
     }
 
     add(mesh) {
@@ -54,14 +66,33 @@ export class GameView {
         window.addEventListener(EventConstants.CLICK, this.onClick.bind(this), false);
     }
 
-    onClick(event) {
-        const clickedTileCoords = getClickedTileCoords(
-            event,
-            this.camera,
-            this.renderer.domElement.width,
-            this.renderer.domElement.height
-        );
+    checkIfPlusButtonWasPressed(intersects) {
+        return intersects[0].object.uuid === this.plusLine.uuid || intersects[0].object.uuid === this.circle.uuid;
+    }
 
-        this.handleClick(clickedTileCoords);
+    onClick(event) {
+        // Update the mouse variable with the normalized device coordinates
+        this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+        // Update the raycaster with the camera and mouse position
+        this.raycaster.setFromCamera(this.mouse, this.camera);
+
+        // Calculate objects intersecting the picking ray
+        const intersects = this.raycaster.intersectObjects(this.uiView.getElements());
+
+        if (intersects.length > 0) {
+            this.handleUIClick(this.uiView.getClickedElementTag(intersects));
+        } else {
+            // If there were no intersects, then check if a tile was pressed
+            const clickedTileCoords = getClickedTileCoords(
+                event,
+                this.camera,
+                this.renderer.domElement.width,
+                this.renderer.domElement.height
+            );
+
+            this.handleTileClick(clickedTileCoords);
+        }
     }
 }

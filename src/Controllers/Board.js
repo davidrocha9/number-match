@@ -99,6 +99,7 @@ export class Board {
     }
 
     canMatchTiles(tile1, tile2) {
+        return true;
         return tile1.number === tile2.number || tile1.number + tile2.number === BoardConfig.TARGET_SUM;
     }
 

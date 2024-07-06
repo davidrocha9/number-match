@@ -1,4 +1,4 @@
-export class ScoreModel {
+export class UIModel {
     constructor() {
         this._score = 0;
     }
