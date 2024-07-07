@@ -2,9 +2,7 @@
 
 ## Overview
 
-Number Match is a logic puzzle game with simple rules: match pairs of numbers and clear the board to succeed. Playing Number Match is a useful pastime for your brain. Train your logic and concentration skills, and try to beat your high score in the numbers game!
-
-This game is a digital version of a popular pen and paper game from your childhood, known as Take Ten, Numberama, or 10 Seeds. Now you can enjoy this logic number game right on your device.
+[Number Match](https://play.google.com/store/apps/details?id=com.easybrain.number.puzzle.game&hl=en) is a logic puzzle game with simple rules: match pairs of numbers and clear the board to succeed. Playing Number Match is a useful pastime for your brain. Train your logic and concentration skills, and try to beat your high score in the numbers game.
 
 ## How to Play
 
