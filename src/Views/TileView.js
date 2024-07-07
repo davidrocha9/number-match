@@ -1,8 +1,8 @@
-import { TileConfig } from "../Constants/TileConfig";
-import { BoardConfig } from "../Constants/BoardConfig";
-import { delay } from "../Utils";
+import { TileConfig } from "../Constants/TileConfig.js";
+import { BoardConfig } from "../Constants/BoardConfig.js";
+import { delay } from "../Utils.js";
 import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js';
-import TWEEN from 'tween.js'
+import TWEEN from 'https://cdn.jsdelivr.net/npm/@tweenjs/tween.js@18.5.0/dist/tween.esm.js';
 
 export class TileView {
     constructor(model, tileRemoveCallback) {

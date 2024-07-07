@@ -1,6 +1,6 @@
-import { TileConfig } from "./Constants/TileConfig";
-import { BoardConfig } from "./Constants/BoardConfig";
-import * as THREE from 'three';
+import { TileConfig } from "./Constants/TileConfig.js";
+import { BoardConfig } from "./Constants/BoardConfig.js";
+import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js';
 
 export const delay = (ms) => {
     return new Promise(resolve => setTimeout(resolve, ms));

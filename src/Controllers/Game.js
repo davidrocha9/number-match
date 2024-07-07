@@ -1,8 +1,8 @@
-import { GameView } from "../Views/GameView";
-import { GameModel } from "../Models/GameModel";
-import { Board } from "./Board";
-import { UI } from "./UI";
-import { UIConfig } from "../Constants/UIConfig";
+import { GameView } from "../Views/GameView.js";
+import { GameModel } from "../Models/GameModel.js";
+import { Board } from "./Board.js";
+import { UI } from "./UI.js";
+import { UIConfig } from "../Constants/UIConfig.js";
 
 export class Game {
     constructor() {

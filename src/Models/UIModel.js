@@ -1,4 +1,4 @@
-import { UIConfig } from "../Constants/UIConfig";
+import { UIConfig } from "../Constants/UIConfig.js";
 
 export class UIModel {
     constructor() {

@@ -1,5 +1,5 @@
 import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js';
-import { UIConfig } from '../Constants/UIConfig';
+import { UIConfig } from '../Constants/UIConfig.js';
 
 export class UIView {
     constructor(model) {

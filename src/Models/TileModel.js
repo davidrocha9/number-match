@@ -1,4 +1,4 @@
-import { TileConfig } from "../Constants/TileConfig";
+import { TileConfig } from "../Constants/TileConfig.js";
 
 export class TileModel {
     constructor(row, col) {

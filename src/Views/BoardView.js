@@ -1,7 +1,6 @@
 import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js';
-import { BoardConfig } from '../Constants/BoardConfig';
-import { TileConfig } from '../Constants/TileConfig';
-import { EventConstants } from '../Constants/EventConstants';
+import { BoardConfig } from '../Constants/BoardConfig.js';
+import { TileConfig } from '../Constants/TileConfig.js';
 
 export class BoardView {
     constructor(model) {

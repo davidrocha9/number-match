@@ -1,8 +1,8 @@
-import { BoardView } from "../Views/BoardView";
-import { BoardModel } from "../Models/BoardModel";
-import { Tile } from "./Tile";
-import { BoardConfig } from "../Constants/BoardConfig";
-import { delay } from "../Utils";
+import { BoardView } from "../Views/BoardView.js";
+import { BoardModel } from "../Models/BoardModel.js";
+import { Tile } from "./Tile.js";
+import { BoardConfig } from "../Constants/BoardConfig.js";
+import { delay } from "../Utils.js";
 
 export class Board {
     constructor() {

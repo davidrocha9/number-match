@@ -1,4 +1,3 @@
-import { TileConfig } from '../Constants/TileConfig.js';
 import { TileModel } from '../Models/TileModel.js';
 import { TileView } from '../Views/TileView.js';
 

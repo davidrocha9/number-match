@@ -1,9 +1,9 @@
 import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js';
-import TWEEN from 'tween.js';
-import { SceneConfig } from '../Constants/SceneConfig';
-import { EventConstants } from '../Constants/EventConstants';
-import { getClickedTileCoords } from '../Utils';
-import { UIView } from '../Views/UIView';
+import TWEEN from 'https://cdn.jsdelivr.net/npm/@tweenjs/tween.js@18.5.0/dist/tween.esm.js';
+import { SceneConfig } from '../Constants/SceneConfig.js';
+import { EventConstants } from '../Constants/EventConstants.js';
+import { getClickedTileCoords } from '../Utils.js';
+import { UIView } from '../Views/UIView.js';
 
 export class GameView {
     constructor(model, tileClickCallback, uiClickCallback) {

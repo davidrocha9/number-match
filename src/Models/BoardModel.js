@@ -1,4 +1,4 @@
-import { BoardConfig } from "../Constants/BoardConfig";
+import { BoardConfig } from "../Constants/BoardConfig.js";
 
 export class BoardModel {
     constructor() {
