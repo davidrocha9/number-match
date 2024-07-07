@@ -99,7 +99,6 @@ export class Board {
     }
 
     canMatchTiles(tile1, tile2) {
-        return true;
         return tile1.number === tile2.number || tile1.number + tile2.number === BoardConfig.TARGET_SUM;
     }
 
@@ -173,6 +172,11 @@ export class Board {
         return this.tiles[idx].every(tile => !tile.active && tile.number > 0)
     }
 
+    checkIfRowIsEmpty(idx)
+    {
+        return this.tiles[idx].every(tile => tile.isEmpty());
+    }
+
     async removeRow(idx) {
         this.amountOfTilesToBeRemoved += BoardConfig.COLS;
     
@@ -192,30 +196,82 @@ export class Board {
 
     handleRemovedRows() {
         for (let rowIdx = 0; rowIdx < BoardConfig.ROWS; rowIdx++) {
-            for (let colIdx = 0; colIdx < BoardConfig.COLS; colIdx++) {
-                this.shiftTileUp(rowIdx, colIdx);
-            }
+            this.shiftTilesUp(rowIdx);
         }
     }
 
-    shiftTileUp(rowIdx, colIdx) {
+    shouldShiftTileUp(rowIdx, colIdx) {
+        return rowIdx > 0 && this.tiles[rowIdx - 1][colIdx].isEmpty() && this.checkIfRowIsEmpty(rowIdx - 1);
+    }
+
+    shiftTilesUp(rowIdx) {
+        if (this.checkIfRowIsEmpty(rowIdx)) {
+            return;
+        }
+
         const startRowIdx = rowIdx;
-        while (rowIdx > 0 && this.tiles[rowIdx - 1][colIdx].isEmpty()) {
+        while (rowIdx > 0 && this.checkIfRowIsEmpty(rowIdx - 1)) {
             rowIdx--;
         }
 
-        this.tiles[rowIdx][colIdx].update(
-            this.tiles[startRowIdx][colIdx].number,
-            this.tiles[startRowIdx][colIdx].active
-        );
-
-        this.tiles[startRowIdx][colIdx].reset();
+        if (startRowIdx === rowIdx) {
+            return;
+        }
+        
+        for (let colIdx = 0; colIdx < BoardConfig.COLS; colIdx++) {
+            this.tiles[rowIdx][colIdx].update(
+                this.tiles[startRowIdx][colIdx].number,
+                this.tiles[startRowIdx][colIdx].active
+            );
+    
+            this.tiles[startRowIdx][colIdx].reset();
+        }
     }
 
     checkForRowsClears() {
         for (let rowIdx = 0; rowIdx < BoardConfig.ROWS; rowIdx++) {
             if (this.checkIfShouldRemoveRow(rowIdx)) {
                 this.removeRow(rowIdx);
+            }
+        }
+    }
+
+    async duplicateBoard() {
+        const firstEmptyTile = this.getFirstEmptyTile();
+        let currTile = { ...firstEmptyTile };
+
+        for (let rowIdx = 0; rowIdx < BoardConfig.ROWS; rowIdx++) {
+            for (let colIdx = 0; colIdx < BoardConfig.COLS; colIdx++) {
+                if (rowIdx === firstEmptyTile.row && colIdx === firstEmptyTile.col) {
+                    return;
+                }
+
+                const tile = this.tiles[rowIdx][colIdx];
+                if (!tile.active) {
+                    continue;
+                }
+
+                await delay(50);
+
+                this.tiles[currTile.row][currTile.col].copy(tile);
+
+                // Update the current tile to the next position
+                currTile.col++;
+                if (currTile.col >= BoardConfig.COLS) {
+                    currTile.col = 0;
+                    currTile.row++;
+                }
+            }
+        }
+    }
+    
+
+    getFirstEmptyTile() {
+        for (let rowIdx = 0; rowIdx < BoardConfig.ROWS; rowIdx++) {
+            for (let colIdx = 0; colIdx < BoardConfig.COLS; colIdx++) {
+                if (this.tiles[rowIdx][colIdx].isEmpty()) {
+                    return { row: rowIdx, col: colIdx };
+                }
             }
         }
     }

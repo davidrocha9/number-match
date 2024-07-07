@@ -35,36 +35,39 @@ export class TileView {
         this.group.add(this.square);
     }
 
-    drawNumber() {
-        const loader = new THREE.FontLoader();
-        loader.load(TileConfig.FONT_URL, (font) => {
-            const geometry = new THREE.TextGeometry(String(this.model.number), {
-                font: font,
-                size: TileConfig.EDGE_SIZE / 2,
-                height: 0.2,
-                curveSegments: 12,
-                bevelEnabled: false,
-                bevelThickness: 0.5,
-                bevelSize: 0.3,
-                bevelOffset: 0,
-                bevelSegments: 5,
-            });
-            let fontColor = this.model.active ? TileConfig.FONT_COLOR : TileConfig.DISABLED_COLOR;
-            fontColor = this.model.isEmpty() ? TileConfig.NOT_SELECTED_COLOR : fontColor;
-
-            const material = new THREE.MeshBasicMaterial({ color: fontColor });
-            this.numberText = new THREE.Mesh(geometry, material);
-
-            geometry.computeBoundingBox();
-            const textWidth = geometry.boundingBox.max.x - geometry.boundingBox.min.x;
-            const textHeight = geometry.boundingBox.max.y - geometry.boundingBox.min.y;
-            const textXCoord = this.x - textWidth / 2 - TileConfig.EDGE_SIZE / 2;
-            const textYCoord = this.y - textHeight / 2 - TileConfig.EDGE_SIZE / 2;
-            this.numberText.position.set(textXCoord, textYCoord, 0);
-
-            this.group.add(this.numberText);
+    async drawNumber() {
+        return new Promise((resolve, reject) => {
+            const loader = new THREE.FontLoader();
+            loader.load(TileConfig.FONT_URL, (font) => {
+                const geometry = new THREE.TextGeometry(String(this.model.number), {
+                    font: font,
+                    size: TileConfig.EDGE_SIZE / 2,
+                    height: 0.2,
+                    curveSegments: 12,
+                    bevelEnabled: false,
+                    bevelThickness: 0.5,
+                    bevelSize: 0.3,
+                    bevelOffset: 0,
+                    bevelSegments: 5,
+                });
+                let fontColor = this.model.active ? TileConfig.FONT_COLOR : TileConfig.DISABLED_COLOR;
+                fontColor = this.model.isEmpty() ? TileConfig.NOT_SELECTED_COLOR : fontColor;
+    
+                const material = new THREE.MeshBasicMaterial({ color: fontColor });
+                this.numberText = new THREE.Mesh(geometry, material);
+    
+                geometry.computeBoundingBox();
+                const textWidth = geometry.boundingBox.max.x - geometry.boundingBox.min.x;
+                const textHeight = geometry.boundingBox.max.y - geometry.boundingBox.min.y;
+                const textXCoord = this.x - textWidth / 2 - TileConfig.EDGE_SIZE / 2;
+                const textYCoord = this.y - textHeight / 2 - TileConfig.EDGE_SIZE / 2;
+                this.numberText.position.set(textXCoord, textYCoord, 0);
+    
+                this.group.add(this.numberText);
+                resolve();
+            }, undefined, reject);
         });
-    }
+    }    
 
     drawFrame() {
         const material = new THREE.LineBasicMaterial({ color: TileConfig.FONT_COLOR });
@@ -99,7 +102,7 @@ export class TileView {
         const startColor = { r: this.square.material.color.r, g: this.square.material.color.g, b: this.square.material.color.b };
         const endColor = new THREE.Color(TileConfig.DISABLED_COLOR);
         const targetColor = { r: endColor.r, g: endColor.g, b: endColor.b };
-
+        
         const tween = new TWEEN.Tween(startColor)
             .to(targetColor, 100) // Fade out over 1000ms (1 second)
             .onUpdate(() => {
@@ -121,4 +124,27 @@ export class TileView {
     removeNumber() {
         this.group.remove(this.numberText);
     }
+
+    async copy(refTileView) {
+        await this.drawNumber();
+        
+        const targetPos = {x: this.numberText.position.x, y: this.numberText.position.y};
+        const startPos = {x: refTileView.numberText.position.x, y: refTileView.numberText.position.y};
+        
+        this.numberText.position.set(startPos.x, startPos.y, 0);
+        this.numberText.material.color = new THREE.Color(TileConfig.FONT_COLOR);
+        this.numberText.material.needsUpdate = true;
+
+        const tween = new TWEEN.Tween(startPos)
+            .to(targetPos, 600) // Fade out over 1000ms (1 second)
+            .onStart(() => {})
+            .onUpdate(() => {
+                this.numberText.position.set(startPos.x, startPos.y, 0);
+                this.numberText.material.needsUpdate = true;
+            })
+            .onComplete(async () => {
+                this.model.active = true;
+            })
+            .start();
+    }    
 }

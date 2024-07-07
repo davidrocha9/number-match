@@ -10,7 +10,7 @@ export class UIView {
 
     draw() {
         this.drawTrophy();
-        this.drawText();
+        this.drawScoreText();
         this.drawPlusButton();
     }
 
@@ -32,12 +32,12 @@ export class UIView {
         });
     }
 
-    drawText() {
+    drawScoreText() {
         const loader = new THREE.FontLoader();
         loader.load(UIConfig.FONT_URL, (font) => {
             const geometry = new THREE.TextGeometry(String(this.model.score), {
                 font: font,
-                size: UIConfig.FONT_SIZE,
+                size: UIConfig.SCORE_FONT_SIZE,
                 height: 0.2,
                 curveSegments: 12,
                 bevelEnabled: false,
@@ -47,24 +47,52 @@ export class UIView {
                 bevelSegments: 5,
             });
             const material = new THREE.MeshBasicMaterial({ color: UIConfig.FONT_COLOR });
-            this.textMesh = new THREE.Mesh(geometry, material);
+            this.scoreText = new THREE.Mesh(geometry, material);
             
             geometry.computeBoundingBox();
             const textWidth = geometry.boundingBox.max.x - geometry.boundingBox.min.x;
             const textHeight = geometry.boundingBox.max.y - geometry.boundingBox.min.y;
             const textXCoord = textWidth / 2;
             const textYCoord = 35 - textHeight / 2;
-            this.textMesh.position.set(textXCoord, textYCoord, 0);
+            this.scoreText.position.set(textXCoord, textYCoord, 0);
 
-            this.group.add(this.textMesh);
+            this.group.add(this.scoreText);
+        });
+    }
+
+    drawPlusChargesText() {
+        const loader = new THREE.FontLoader();
+        loader.load(UIConfig.FONT_URL, (font) => {
+            const geometry = new THREE.TextGeometry(String(this.model.plusCharges), {
+                font: font,
+                size: UIConfig.PLUS_CHARGES_FONT_SIZE,
+                height: 0.2,
+                curveSegments: 12,
+                bevelEnabled: false,
+                bevelThickness: 0.5,
+                bevelSize: 0.3,
+                bevelOffset: 0,
+                bevelSegments: 5,
+            });
+            const material = new THREE.MeshBasicMaterial({ color: UIConfig.PLUS_CHARGES_TEXT_COLOR });
+            this.plusChargesText = new THREE.Mesh(geometry, material);
+            
+            geometry.computeBoundingBox();
+            const textWidth = geometry.boundingBox.max.x - geometry.boundingBox.min.x;
+            const textHeight = geometry.boundingBox.max.y - geometry.boundingBox.min.y;
+            const textXCoord = 1 + textWidth / 2;
+            const textYCoord = -33 - textHeight / 2;
+            this.plusChargesText.position.set(textXCoord, textYCoord, 1);
+
+            this.group.add(this.plusChargesText);
         });
     }
 
     drawPlusButton() {
-        const circleGeometry = new THREE.CircleGeometry(3, 64);  // Radius of 1 and 32 segments
-        const circleMaterial = new THREE.MeshBasicMaterial({ color: UIConfig.PLUS_BUTTON_COLOR });  // Yellow color
-        this.circle = new THREE.Mesh(circleGeometry, circleMaterial);
-        this.circle.position.set(
+        const backCircleGeometry = new THREE.CircleGeometry(3, 64);  // Radius of 1 and 32 segments
+        const backCircleMaterial = new THREE.MeshBasicMaterial({ color: UIConfig.PLUS_BUTTON_BG_COLOR });  // Yellow color
+        this.backCircle = new THREE.Mesh(backCircleGeometry, backCircleMaterial);
+        this.backCircle.position.set(
             UIConfig.PLUS_BUTTON_COORDS.x,
             UIConfig.PLUS_BUTTON_COORDS.y,
             UIConfig.PLUS_BUTTON_COORDS.z
@@ -89,22 +117,53 @@ export class UIView {
             UIConfig.PLUS_BUTTON_COORDS.z
         );
 
-        this.group.add(this.circle);
+        const chargesCircleGeometry = new THREE.CircleGeometry(1.25, 64);  // Radius of 1 and 32 segments
+        const chargesCircleMaterial = new THREE.MeshBasicMaterial({ color: UIConfig.PLUS_CHARGES_BG_COLOR });  // Yellow color
+        this.chargesCircle = new THREE.Mesh(chargesCircleGeometry, chargesCircleMaterial);
+        this.chargesCircle.position.set(
+            UIConfig.PLUS_CHARGES_COORDS.x,
+            UIConfig.PLUS_CHARGES_COORDS.y,
+            UIConfig.PLUS_CHARGES_COORDS.z
+        );
+
+        this.group.add(this.backCircle);
         this.group.add(this.plusLine);
+        this.group.add(this.chargesCircle);
+
+        this.drawPlusChargesText();
     }
 
-    update(model) {
+    updateScore(model) {
         this.model = model;
 
-        this.group.remove(this.textMesh);
-        this.drawText();
+        this.group.remove(this.scoreText);
+        this.drawScoreText();
+    }
+
+    updateUi(model) {
+        this.model = model;
+
+        this.group.remove(this.plusChargesText);
+        this.drawPlusChargesText();
     }
 
     getElements() {
         return this.group.children;
     }
 
-    getClickedElementTag(intersects) {
-        console.log(intersects)
+    getClickedElementId(intersects) {
+        for (let i = 0; i < intersects.length; i++) {
+            const intersect = intersects[i];
+            const object = intersect.object;
+            const id = object.uuid;
+
+            if (this.checkIfPlusButtonWasClicked(id)) {
+                return UIConfig.PLUS_BUTTON_ID;
+            }
+        }
+    }
+
+    checkIfPlusButtonWasClicked(id) {
+        return id === this.plusLine.uuid || id === this.backCircle.uuid || id === this.chargesCircle.uuid;
     }
 }

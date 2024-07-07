@@ -44,8 +44,12 @@ export class GameView {
         this.scene.add(this.uiView.group);
     }
 
-    update(uiModel) {
-        this.uiView.update(uiModel);
+    updateScore(uiModel) {
+        this.uiView.updateScore(uiModel);
+    }
+
+    updateUi(uiModel) {
+        this.uiView.updateUi(uiModel);
     }
 
     add(mesh) {
@@ -82,7 +86,7 @@ export class GameView {
         const intersects = this.raycaster.intersectObjects(this.uiView.getElements());
 
         if (intersects.length > 0) {
-            this.handleUIClick(this.uiView.getClickedElementTag(intersects));
+            this.handleUIClick(this.uiView.getClickedElementId(intersects));
         } else {
             // If there were no intersects, then check if a tile was pressed
             const clickedTileCoords = getClickedTileCoords(

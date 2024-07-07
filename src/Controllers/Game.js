@@ -2,6 +2,7 @@ import { GameView } from "../Views/GameView";
 import { GameModel } from "../Models/GameModel";
 import { Board } from "./Board";
 import { UI } from "./UI";
+import { UIConfig } from "../Constants/UIConfig";
 
 export class Game {
     constructor() {
@@ -24,7 +25,18 @@ export class Game {
     }
 
     onUIClick(intersects) {
-        this.ui.handleClick(intersects);
+        const isThereOpenSpace = this.board.getFirstEmptyTile() !== undefined;
+        const action = this.ui.handleClick(intersects, isThereOpenSpace);
+
+        switch (action) {
+            case UIConfig.DUPLICATE_BOARD:
+                this.board.duplicateBoard(isThereOpenSpace);
+                break;
+            case UIConfig.IDLE:
+                return;
+        }
+
+        this.view.updateUi(this.ui.model);
     }
 
     onTileClick(coords) {
@@ -37,6 +49,6 @@ export class Game {
 
         this.board.checkForRowsClears();
 
-        this.view.update(this.ui.model);
+        this.view.updateScore(this.ui.model);
     }
 }

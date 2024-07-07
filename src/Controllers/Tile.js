@@ -70,6 +70,11 @@ export class Tile {
         this.view.drawNumber();
     }
 
+    async copy(tile) {
+        this.model.number = tile.number;
+        await this.view.copy(tile.view);
+    }
+
     get row() {
         return this.model.row;
     }
