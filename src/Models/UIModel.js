@@ -3,6 +3,7 @@ import { UIConfig } from "../Constants/UIConfig.js";
 export class UIModel {
     constructor() {
         this._score = 0;
+        this._highScore = 0;
         this._plusCharges = UIConfig.INITIAL_PLUS_CHARGES;
     }
 

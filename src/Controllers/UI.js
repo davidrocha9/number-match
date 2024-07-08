@@ -2,8 +2,8 @@ import { UIConfig } from "../Constants/UIConfig.js";
 import { UIModel } from "../Models/UIModel.js";
 
 export class UI {
-    constructor() {
-        this.model = new UIModel();
+    constructor(model) {
+        this.model = model;
     }
 
     increase(points) {

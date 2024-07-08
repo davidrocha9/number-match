@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "live-server": "^1.2.2",
     "three": "^0.166.1",
     "tween.js": "^16.6.0"
   },

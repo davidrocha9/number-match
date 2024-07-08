@@ -5,35 +5,34 @@ import { BoardConfig } from "../Constants/BoardConfig.js";
 import { delay } from "../Utils.js";
 
 export class Board {
-    constructor() {
-        this.model = new BoardModel();
+    constructor(model) {
+        this.model = model;
         this.view = new BoardView(this.model);
 
-        this.createTiles();
+        this.createTileControllers();
         this.amountOfTilesToBeRemoved = 0;
+        this._selectedTile = null;
     }
 
-    createTiles() {
-        this.tiles = [];
-        this._selectedTile = null;
+    createTileControllers() {
+        this.tileControllers = [];
 
-        let row = [];
         for (let rowIdx = 0; rowIdx < this.model.rows; rowIdx++) {
+            const row = [];
             for (let colIdx = 0; colIdx < this.model.cols; colIdx++) {
-                const tile = new Tile(rowIdx, colIdx, this.handleRemovedTile);
-                this.view.add(tile.view.group);
-                row.push(tile);
+                const tileModel = this.model.grid[rowIdx][colIdx];
+                const tileController = new Tile(tileModel, this.handleRemovedTile);
+                this.view.add(tileController.view.group);
+                row.push(tileController);
             }
-
-            this.tiles.push(row);
-            row = [];
+            this.tileControllers.push(row);
         }
     }
 
     generateInitialTiles() {
         for (let rowIdx = 0; rowIdx < this.model.rows; rowIdx++) {
             for (let colIdx = 0; colIdx < this.model.cols; colIdx++) {
-                this.tiles[rowIdx][colIdx].enable();
+                this.tileControllers[rowIdx][colIdx].enable();
 
                 // Should only generate a pre-determined number of tiles
                 if (rowIdx * this.model.cols + colIdx > BoardConfig.GAME_START_AMOUNT_TILES) {
@@ -46,7 +45,7 @@ export class Board {
     getClickedTileCoords(uuid) {
         for (let rowIdx = 0; rowIdx < this.model.rows; rowIdx++) {
             for (let colIdx = 0; colIdx < this.model.cols; colIdx++) {
-                const tile = this.tiles[rowIdx][colIdx];
+                const tile = this.model.grid[rowIdx][colIdx];
                 
                 if (tile.containsObjectWithUUID(uuid) && tile.active) {
                     return { row: rowIdx, col: colIdx };
@@ -62,14 +61,14 @@ export class Board {
             return false;
         }
         
-        const clickedTile = this.tiles[coords.row][coords.col];
+        const clickedTile = this.model.grid[coords.row][coords.col];
         return clickedTile.active;
     }
 
     onTileClick(tileCoords) {
         const XCoords = tileCoords.col;
         const YCoords = tileCoords.row;
-        const tile = this.tiles[YCoords][XCoords];
+        const tile = this.tileControllers[YCoords][XCoords];
         
         if (!this._selectedTile || this._selectedTile === tile) {
             tile.addHighlight();
@@ -109,14 +108,14 @@ export class Board {
         if (this.areTilesDirectlyConnected(xDiff, yDiff)) {
             const xStep = xDiff / Math.abs(xDiff) || 0;
             const yStep = yDiff / Math.abs(yDiff) || 0;
-            let currTile = this.tiles[tile1.row + yStep][tile1.col + xStep];
+            let currTile = this.model.grid[tile1.row + yStep][tile1.col + xStep];
 
             while (currTile.col !== tile2.model.col || currTile.row !== tile2.model.row) {
                 if (currTile.active) {
                     return false;
                 }
 
-                currTile = this.tiles[currTile.row + yStep][currTile.col + xStep];
+                currTile = this.model.grid[currTile.row + yStep][currTile.col + xStep];
             }
 
             return true;
@@ -129,10 +128,10 @@ export class Board {
 
         while (startTile.col !== targetTile.col || startTile.row !== targetTile.row) {
             if (startTile.col + xStep >= BoardConfig.COLS - 1) {
-                startTile = this.tiles[startTile.row + yStep][0];
+                startTile = this.model.grid[startTile.row + yStep][0];
             }
             else{
-                startTile = this.tiles[startTile.row][startTile.col + xStep];
+                startTile = this.model.grid[startTile.row][startTile.col + xStep];
             }
 
             if (startTile.active && startTile !== targetTile) {
@@ -169,12 +168,12 @@ export class Board {
 
     checkIfShouldRemoveRow(idx)
     {
-        return this.tiles[idx].every(tile => !tile.active && tile.number > 0)
+        return this.model.grid[idx].every(tile => !tile.active && tile.number > 0)
     }
 
     checkIfRowIsEmpty(idx)
     {
-        return this.tiles[idx].every(tile => tile.isEmpty());
+        return this.model.grid[idx].every(tile => tile.isEmpty());
     }
 
     async removeRow(idx) {
@@ -182,7 +181,7 @@ export class Board {
     
         for (let colIdx = 0; colIdx < BoardConfig.COLS; colIdx++) {
             await delay(50);
-            this.tiles[idx][colIdx].remove();
+            this.model.grid[idx][colIdx].remove();
         }
     }
 
@@ -201,7 +200,7 @@ export class Board {
     }
 
     shouldShiftTileUp(rowIdx, colIdx) {
-        return rowIdx > 0 && this.tiles[rowIdx - 1][colIdx].isEmpty() && this.checkIfRowIsEmpty(rowIdx - 1);
+        return rowIdx > 0 && this.model.grid[rowIdx - 1][colIdx].isEmpty() && this.checkIfRowIsEmpty(rowIdx - 1);
     }
 
     shiftTilesUp(rowIdx) {
@@ -219,12 +218,12 @@ export class Board {
         }
         
         for (let colIdx = 0; colIdx < BoardConfig.COLS; colIdx++) {
-            this.tiles[rowIdx][colIdx].update(
-                this.tiles[startRowIdx][colIdx].number,
-                this.tiles[startRowIdx][colIdx].active
+            this.model.grid[rowIdx][colIdx].update(
+                this.model.grid[startRowIdx][colIdx].number,
+                this.model.grid[startRowIdx][colIdx].active
             );
     
-            this.tiles[startRowIdx][colIdx].reset();
+            this.model.grid[startRowIdx][colIdx].reset();
         }
     }
 
@@ -246,14 +245,14 @@ export class Board {
                     return;
                 }
 
-                const tile = this.tiles[rowIdx][colIdx];
+                const tile = this.model.grid[rowIdx][colIdx];
                 if (!tile.active) {
                     continue;
                 }
 
                 await delay(50);
 
-                this.tiles[currTile.row][currTile.col].copy(tile);
+                this.model.grid[currTile.row][currTile.col].copy(tile);
 
                 // Update the current tile to the next position
                 currTile.col++;
@@ -269,10 +268,18 @@ export class Board {
     getFirstEmptyTile() {
         for (let rowIdx = 0; rowIdx < BoardConfig.ROWS; rowIdx++) {
             for (let colIdx = 0; colIdx < BoardConfig.COLS; colIdx++) {
-                if (this.tiles[rowIdx][colIdx].isEmpty()) {
+                if (this.model.grid[rowIdx][colIdx].isEmpty()) {
                     return { row: rowIdx, col: colIdx };
                 }
             }
         }
+    }
+
+    serialize() {
+        return this.model.serialize();
+    }
+
+    deserialize(data) {
+        this.model.deserialize(data);
     }
 }

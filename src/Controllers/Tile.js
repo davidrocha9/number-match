@@ -2,9 +2,13 @@ import { TileModel } from '../Models/TileModel.js';
 import { TileView } from '../Views/TileView.js';
 
 export class Tile {
-    constructor(row, col, resetCallBack) {
-        this.model = new TileModel(row, col);
+    constructor(model, resetCallBack) {
+        this.model = model;
         this.view = new TileView(this.model, this.removeCallback);
+
+        if (!this.model.isEmpty()) {
+            this.view.drawNumber();
+        }
 
         this.resetCallback = resetCallBack;
     }
@@ -28,7 +32,6 @@ export class Tile {
 
     enable() {
         this.model.active = true;
-        this.model.number = Math.floor(1 + Math.random() * 9);
         this.view.drawNumber();
     }
     

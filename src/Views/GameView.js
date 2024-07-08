@@ -8,7 +8,7 @@ import { UIView } from '../Views/UIView.js';
 export class GameView {
     constructor(model, tileClickCallback, uiClickCallback) {
         this.model = model;
-        this.uiView = new UIView(this.model.ui);
+        this.uiView = new UIView(this.model);
 
         this.init();
         this.addEventListeners();

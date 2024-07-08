@@ -16,6 +16,22 @@ export class TileModel {
         return this._number === TileConfig.EMPTY_VALUE;
     }
 
+    serialize() {
+        return {
+            row: this._row,
+            col: this._col,
+            number: this._number,
+            active: this._active
+        };
+    }
+
+    deserialize(data) {
+        this._row = data.row;
+        this._col = data.col;
+        this._number = data.number;
+        this._active = data.active;
+    }
+
     get number() {
         return this._number;
     }

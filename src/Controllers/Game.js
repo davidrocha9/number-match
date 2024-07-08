@@ -3,12 +3,15 @@ import { GameModel } from "../Models/GameModel.js";
 import { Board } from "./Board.js";
 import { UI } from "./UI.js";
 import { UIConfig } from "../Constants/UIConfig.js";
+import { GameConfig } from "../Constants/GameConfig.js";
 
 export class Game {
     constructor() {
         this.model = new GameModel();
-        this.board = new Board();
-        this.ui = new UI();
+        this.load();
+
+        this.board = new Board(this.model.board);
+        this.ui = new UI(this.model);
 
         this.view = new GameView(
             this.model,
@@ -16,12 +19,10 @@ export class Game {
             this.onUIClick.bind(this))
         ;
         this.view.add(this.board.view.grid);
-
-        this.start();
-    }
-
-    start() {
-        this.board.generateInitialTiles();
+        
+        if (!this.checkIfThereIsASavedGame()) {
+            this.board.generateInitialTiles();
+        }
     }
 
     onUIClick(intersects) {
@@ -37,6 +38,8 @@ export class Game {
         }
 
         this.view.updateUi(this.ui.model);
+
+        this.save()
     }
 
     onTileClick(coords) {
@@ -50,5 +53,31 @@ export class Game {
         this.board.checkForRowsClears();
 
         this.view.updateScore(this.ui.model);
+
+        this.save();
+    }
+
+    checkIfThereIsASavedGame() {
+        return localStorage.getItem(GameConfig.GAME_KEY) !== null;
+    }
+
+    load() {
+        const data = JSON.parse(localStorage.getItem(GameConfig.GAME_KEY));
+        
+        if (data) {
+            this.model.deserialize(data);
+        }
+    }
+
+    save() {
+        const gameData = this.model.serialize();
+        const boardData = this.board.serialize();
+
+        const data = {
+            ...gameData,
+            ...boardData
+        };
+
+        localStorage.setItem(GameConfig.GAME_KEY, JSON.stringify(data));
     }
 }
