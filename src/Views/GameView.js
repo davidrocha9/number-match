@@ -8,7 +8,7 @@ import { UIView } from '../Views/UIView.js';
 export class GameView {
     constructor(model, tileClickCallback, uiClickCallback) {
         this.model = model;
-        this.uiView = new UIView(this.model);
+        this._uiView = new UIView(this.model);
 
         this.init();
         this.addEventListeners();
@@ -41,15 +41,15 @@ export class GameView {
         // Animate the scene
         this.animate();
 
-        this.scene.add(this.uiView.group);
+        this.scene.add(this._uiView.group);
     }
 
     updateScore(uiModel) {
-        this.uiView.updateScore(uiModel);
+        this._uiView.updateScore(uiModel);
     }
 
     updateUi(uiModel) {
-        this.uiView.updateUi(uiModel);
+        this._uiView.updateUi(uiModel);
     }
 
     add(mesh) {
@@ -74,6 +74,10 @@ export class GameView {
         return intersects[0].object.uuid === this.plusLine.uuid || intersects[0].object.uuid === this.circle.uuid;
     }
 
+    showGameEndScreen() {
+        this._uiView.showGameEndScreen();
+    }
+
     onClick(event) {
         // Update the mouse variable with the normalized device coordinates
         this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -83,10 +87,10 @@ export class GameView {
         this.raycaster.setFromCamera(this.mouse, this.camera);
 
         // Calculate objects intersecting the picking ray
-        const intersects = this.raycaster.intersectObjects(this.uiView.getElements());
+        const intersects = this.raycaster.intersectObjects(this._uiView.getElements());
 
         if (intersects.length > 0) {
-            this.handleUIClick(this.uiView.getClickedElementId(intersects));
+            this.handleUIClick(this._uiView.getClickedElementId(intersects));
         } else {
             // If there were no intersects, then check if a tile was pressed
             const clickedTileCoords = getClickedTileCoords(

@@ -30,6 +30,10 @@ export class Tile {
         this.view.removeHighlight();
     }
 
+    generateNumber() {
+        this.model.number = Math.floor(1 + Math.random() * 9);
+    }
+
     enable() {
         this.model.active = true;
         this.view.drawNumber();

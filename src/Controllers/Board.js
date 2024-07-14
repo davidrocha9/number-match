@@ -1,5 +1,4 @@
 import { BoardView } from "../Views/BoardView.js";
-import { BoardModel } from "../Models/BoardModel.js";
 import { Tile } from "./Tile.js";
 import { BoardConfig } from "../Constants/BoardConfig.js";
 import { delay } from "../Utils.js";
@@ -7,9 +6,23 @@ import { delay } from "../Utils.js";
 export class Board {
     constructor(model) {
         this.model = model;
+
+        if (!this.model.grid) {
+            this.generateNewGrid();
+        }
+
         this.view = new BoardView(this.model);
 
+        this.reset();
+    }
+
+    clearGrid() {
+        this.model.grid = null;
+    }
+
+    reset() {
         this.createTileControllers();
+        this.generateNewGrid();
         this.amountOfTilesToBeRemoved = 0;
         this._selectedTile = null;
     }
@@ -29,9 +42,10 @@ export class Board {
         }
     }
 
-    generateInitialTiles() {
+    generateNewGrid() {
         for (let rowIdx = 0; rowIdx < this.model.rows; rowIdx++) {
             for (let colIdx = 0; colIdx < this.model.cols; colIdx++) {
+                this.tileControllers[rowIdx][colIdx].generateNumber();
                 this.tileControllers[rowIdx][colIdx].enable();
 
                 // Should only generate a pre-determined number of tiles
@@ -45,7 +59,7 @@ export class Board {
     getClickedTileCoords(uuid) {
         for (let rowIdx = 0; rowIdx < this.model.rows; rowIdx++) {
             for (let colIdx = 0; colIdx < this.model.cols; colIdx++) {
-                const tile = this.model.grid[rowIdx][colIdx];
+                const tile = this.tileControllers[rowIdx][colIdx];
                 
                 if (tile.containsObjectWithUUID(uuid) && tile.active) {
                     return { row: rowIdx, col: colIdx };
@@ -61,7 +75,7 @@ export class Board {
             return false;
         }
         
-        const clickedTile = this.model.grid[coords.row][coords.col];
+        const clickedTile = this.tileControllers[coords.row][coords.col];
         return clickedTile.active;
     }
 
@@ -108,14 +122,14 @@ export class Board {
         if (this.areTilesDirectlyConnected(xDiff, yDiff)) {
             const xStep = xDiff / Math.abs(xDiff) || 0;
             const yStep = yDiff / Math.abs(yDiff) || 0;
-            let currTile = this.model.grid[tile1.row + yStep][tile1.col + xStep];
+            let currTile = this.tileControllers[tile1.row + yStep][tile1.col + xStep];
 
             while (currTile.col !== tile2.model.col || currTile.row !== tile2.model.row) {
                 if (currTile.active) {
                     return false;
                 }
 
-                currTile = this.model.grid[currTile.row + yStep][currTile.col + xStep];
+                currTile = this.tileControllers[currTile.row + yStep][currTile.col + xStep];
             }
 
             return true;
@@ -127,11 +141,11 @@ export class Board {
         let yStep = 1;
 
         while (startTile.col !== targetTile.col || startTile.row !== targetTile.row) {
-            if (startTile.col + xStep >= BoardConfig.COLS - 1) {
-                startTile = this.model.grid[startTile.row + yStep][0];
+            if (startTile.col + xStep >= this.model.cols - 1) {
+                startTile = this.tileControllers[startTile.row + yStep][0];
             }
             else{
-                startTile = this.model.grid[startTile.row][startTile.col + xStep];
+                startTile = this.tileControllers[startTile.row][startTile.col + xStep];
             }
 
             if (startTile.active && startTile !== targetTile) {
@@ -168,20 +182,20 @@ export class Board {
 
     checkIfShouldRemoveRow(idx)
     {
-        return this.model.grid[idx].every(tile => !tile.active && tile.number > 0)
+        return this.tileControllers[idx].every(tile => !tile.active && tile.number > 0)
     }
 
     checkIfRowIsEmpty(idx)
     {
-        return this.model.grid[idx].every(tile => tile.isEmpty());
+        return this.tileControllers[idx].every(tile => tile.isEmpty());
     }
 
     async removeRow(idx) {
-        this.amountOfTilesToBeRemoved += BoardConfig.COLS;
+        this.amountOfTilesToBeRemoved += this.model.cols;
     
-        for (let colIdx = 0; colIdx < BoardConfig.COLS; colIdx++) {
+        for (let colIdx = 0; colIdx < this.model.cols; colIdx++) {
             await delay(50);
-            this.model.grid[idx][colIdx].remove();
+            this.tileControllers[idx][colIdx].remove();
         }
     }
 
@@ -194,7 +208,7 @@ export class Board {
     }
 
     handleRemovedRows() {
-        for (let rowIdx = 0; rowIdx < BoardConfig.ROWS; rowIdx++) {
+        for (let rowIdx = 0; rowIdx < this.model.rows; rowIdx++) {
             this.shiftTilesUp(rowIdx);
         }
     }
@@ -217,18 +231,18 @@ export class Board {
             return;
         }
         
-        for (let colIdx = 0; colIdx < BoardConfig.COLS; colIdx++) {
-            this.model.grid[rowIdx][colIdx].update(
-                this.model.grid[startRowIdx][colIdx].number,
-                this.model.grid[startRowIdx][colIdx].active
+        for (let colIdx = 0; colIdx < this.model.cols; colIdx++) {
+            this.tileControllers[rowIdx][colIdx].update(
+                this.tileControllers[startRowIdx][colIdx].number,
+                this.tileControllers[startRowIdx][colIdx].active
             );
     
-            this.model.grid[startRowIdx][colIdx].reset();
+            this.tileControllers[startRowIdx][colIdx].reset();
         }
     }
 
     checkForRowsClears() {
-        for (let rowIdx = 0; rowIdx < BoardConfig.ROWS; rowIdx++) {
+        for (let rowIdx = 0; rowIdx < this.model.rows; rowIdx++) {
             if (this.checkIfShouldRemoveRow(rowIdx)) {
                 this.removeRow(rowIdx);
             }
@@ -239,24 +253,24 @@ export class Board {
         const firstEmptyTile = this.getFirstEmptyTile();
         let currTile = { ...firstEmptyTile };
 
-        for (let rowIdx = 0; rowIdx < BoardConfig.ROWS; rowIdx++) {
-            for (let colIdx = 0; colIdx < BoardConfig.COLS; colIdx++) {
+        for (let rowIdx = 0; rowIdx < this.model.rows; rowIdx++) {
+            for (let colIdx = 0; colIdx < this.model.cols; colIdx++) {
                 if (rowIdx === firstEmptyTile.row && colIdx === firstEmptyTile.col) {
                     return;
                 }
-
-                const tile = this.model.grid[rowIdx][colIdx];
+                
+                const tile = this.tileControllers[rowIdx][colIdx];
                 if (!tile.active) {
                     continue;
                 }
 
                 await delay(50);
 
-                this.model.grid[currTile.row][currTile.col].copy(tile);
+                this.tileControllers[currTile.row][currTile.col].copy(tile);
 
                 // Update the current tile to the next position
                 currTile.col++;
-                if (currTile.col >= BoardConfig.COLS) {
+                if (currTile.col >= this.model.cols) {
                     currTile.col = 0;
                     currTile.row++;
                 }
@@ -266,13 +280,36 @@ export class Board {
     
 
     getFirstEmptyTile() {
-        for (let rowIdx = 0; rowIdx < BoardConfig.ROWS; rowIdx++) {
-            for (let colIdx = 0; colIdx < BoardConfig.COLS; colIdx++) {
+        for (let rowIdx = 0; rowIdx < this.model.rows; rowIdx++) {
+            for (let colIdx = 0; colIdx < this.model.cols; colIdx++) {
                 if (this.model.grid[rowIdx][colIdx].isEmpty()) {
                     return { row: rowIdx, col: colIdx };
                 }
             }
         }
+    }
+
+    checkForMoreMatches() {
+        // get active tiles
+        const activeTiles = [];
+        for (let rowIdx = 0; rowIdx < this.model.rows; rowIdx++) {
+            for (let colIdx = 0; colIdx < this.model.cols; colIdx++) {
+                if (this.tileControllers[rowIdx][colIdx].active) {
+                    activeTiles.push(this.tileControllers[rowIdx][colIdx]);
+                }
+            }
+        }
+
+        for (let i = 0; i < activeTiles.length; i++) {
+            for (let j = i + 1; j < activeTiles.length; j++) {
+                if (this.canMatchTiles(activeTiles[i], activeTiles[j]) && this.checkIfTilesAreAdjacent(activeTiles[i], activeTiles[j])) {
+                    console.log(activeTiles[i].row, activeTiles[i].col, activeTiles[j].row, activeTiles[j].col);
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     serialize() {

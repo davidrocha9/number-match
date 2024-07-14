@@ -63,4 +63,8 @@ export class BoardModel {
     get grid() {
         return this._grid;
     }
+
+    set grid(grid) {
+        this._grid = grid;
+    }
 }

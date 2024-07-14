@@ -10,6 +10,12 @@ export class GameModel {
         this._board = new BoardModel();
     }
 
+    reset() {
+        this._score = 0;
+        this._plusCharges = UIConfig.INITIAL_PLUS_CHARGES;
+        this._board.createGrid();
+    }
+
     get score () {
         return this._score;
     }

@@ -11,12 +11,15 @@ export class UI {
     }
 
     handleClick(id, isThereOpenSpace) {
+        console.log(id);
         switch (id) {
-            case UIConfig.PLUS_BUTTON_ID:
+            case UIConfig.PLUS_BUTTON:
                 if (!isThereOpenSpace) {
                     return UIConfig.IDLE;
                 }
                 return this.handlePlusButtonPress();
+            case UIConfig.PLAY_AGAIN:
+                return UIConfig.PLAY_AGAIN
             default:
                 break;
         }

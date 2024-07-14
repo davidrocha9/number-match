@@ -7,22 +7,24 @@ import { GameConfig } from "../Constants/GameConfig.js";
 
 export class Game {
     constructor() {
-        this.model = new GameModel();
+        this._model = new GameModel();
         this.load();
 
-        this.board = new Board(this.model.board);
-        this.ui = new UI(this.model);
+        this.board = new Board(this._model.board);
+        this.ui = new UI(this._model);
 
         this.view = new GameView(
-            this.model,
+            this._model,
             this.onTileClick.bind(this),
             this.onUIClick.bind(this))
         ;
         this.view.add(this.board.view.grid);
-        
-        if (!this.checkIfThereIsASavedGame()) {
-            this.board.generateInitialTiles();
-        }
+    }
+
+    reset() {
+        this._model.reset();
+        this.board.reset();
+        this.view.updateUi(this._model);
     }
 
     onUIClick(intersects) {
@@ -32,6 +34,9 @@ export class Game {
         switch (action) {
             case UIConfig.DUPLICATE_BOARD:
                 this.board.duplicateBoard(isThereOpenSpace);
+                break;
+            case UIConfig.PLAY_AGAIN:
+                this.reset();
                 break;
             case UIConfig.IDLE:
                 return;
@@ -54,6 +59,10 @@ export class Game {
 
         this.view.updateScore(this.ui.model);
 
+        if (!this.board.checkForMoreMatches() /*&& this._model.plusCharges <= 0*/) {
+            this.handleGameEnd();
+        }
+
         this.save();
     }
 
@@ -61,16 +70,21 @@ export class Game {
         return localStorage.getItem(GameConfig.GAME_KEY) !== null;
     }
 
+    handleGameEnd() {
+        this.board.clearGrid();
+        this.view.showGameEndScreen();
+        this.save();
+    }
+
     load() {
         const data = JSON.parse(localStorage.getItem(GameConfig.GAME_KEY));
-        
         if (data) {
-            this.model.deserialize(data);
+            this._model.deserialize(data);
         }
     }
 
     save() {
-        const gameData = this.model.serialize();
+        const gameData = this._model.serialize();
         const boardData = this.board.serialize();
 
         const data = {

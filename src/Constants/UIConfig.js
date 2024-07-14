@@ -22,7 +22,8 @@ export const UIConfig = {
     PLUS_CHARGES_FONT_SIZE: 1.25,
     FONT_COLOR: 0x000000,
 
-    PLUS_BUTTON_ID: 'plus-button',
+    PLUS_BUTTON: 'plus-button',
+    PLAY_AGAIN: 'play-again',
 
     IDLE: 'idle',
     DUPLICATE_BOARD: 'duplicate-board',
